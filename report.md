@@ -8,6 +8,7 @@ This report documents the implementation, empirical testing, and theoretical ana
 3. **Uniform-Cost Search (UCS)** - Priority-based Graph Search by path cost $g(n)$
 4. **A* Search** - Informed Graph Search by $f(n) = g(n) + h(n)$
 5. **CornersProblem State Formulation** - Abstract search space encoding Pac-Man's position and visited corner states.
+6. **CornersProblem Heuristic (`cornersHeuristic`)** - Permutation-based minimum Manhattan path lower bound.
 
 ---
 
@@ -28,6 +29,22 @@ This report documents the implementation, empirical testing, and theoretical ana
 | **Q4** | A* | `openMaze` | `manhattanHeuristic` | **54** | **535** | **Yes** |
 | **Q5** | BFS | `tinyCorners` | `CornersProblem` | **28** | 252 | **Yes** |
 | **Q5** | BFS | `mediumCorners` | `CornersProblem` | **106** | **1,966** | **Yes** |
+| Question | Algorithm | Layout / Problem | Heuristic / Cost Function | Solution Cost | Nodes Expanded | Optimal? | Grading Tier |
+| :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: |
+| **Q1** | DFS | `tinyMaze` | Uniform ($1$) | 10 | 15 | No | N/A |
+| **Q1** | DFS | `mediumMaze` | Uniform ($1$) | 130 | 146 | No | N/A |
+| **Q1** | DFS | `bigMaze` | Uniform ($1$) | 210 | 390 | No | N/A |
+| **Q2** | BFS | `mediumMaze` | Uniform ($1$) | **68** | 269 | **Yes** | N/A |
+| **Q2** | BFS | `bigMaze` | Uniform ($1$) | **210** | 620 | **Yes** | N/A |
+| **Q2** | BFS | `eightpuzzle.py` | Uniform ($1$) | 1 | N/A | **Yes** | N/A |
+| **Q3** | UCS | `mediumMaze` | `SearchAgent` (Uniform) | **68** | 269 | **Yes** | N/A |
+| **Q3** | UCS | `mediumDottedMaze` | `StayEastSearchAgent` ($2^x$) | **1** | 186 | **Yes** | N/A |
+| **Q3** | UCS | `mediumScaryMaze` | `StayWestSearchAgent` ($2^x$) | **68,719,479,864** | 108 | **Yes** | N/A |
+| **Q4** | A* | `bigMaze` | `manhattanHeuristic` | **210** | **549** | **Yes** | N/A |
+| **Q4** | A* | `openMaze` | `manhattanHeuristic` | **54** | **535** | **Yes** | N/A |
+| **Q5** | BFS | `tinyCorners` | `CornersProblem` | **28** | 252 | **Yes** | N/A |
+| **Q5** | BFS | `mediumCorners` | `CornersProblem` | **106** | 1,966 | **Yes** | N/A |
+| **Q6** | A* | `mediumCorners` | `cornersHeuristic` | **106** | **741** | **Yes** | **Top Tier (< 800)** |
 
 ---
 
@@ -169,11 +186,21 @@ The `CornersProblem` requires Pac-Man to find the shortest path visiting all 4 c
 
 ### 5.2 Abstract State Space Selection
 To prevent state-space explosion, the state is represented compactly as:
+State representation:
 $$\text{state} = \big((x, y), \, (c_0, c_1, c_2, c_3)\big)$$
 where $(x, y)$ is Pac-Man's position and $(c_0, c_1, c_2, c_3)$ is a tuple of 4 booleans tracking whether each of the 4 corner positions has been visited.
 
 ### 5.3 Implementation
 Implemented in `CornersProblem` in `searchAgents.py`:
+---
+
+## Question 6: CornersProblem Heuristic (`cornersHeuristic`)
+
+### 6.1 Description
+To achieve optimal search node reduction while guaranteeing admissibility, `cornersHeuristic` computes the minimum total Manhattan distance required to visit all remaining unvisited corners over all possible permutations of corner visiting orders.
+
+### 6.2 Implementation
+Implemented strictly inside `cornersHeuristic` in `searchAgents.py`:
 
 ```python
 class CornersProblem(search.SearchProblem):
@@ -186,19 +213,34 @@ class CornersProblem(search.SearchProblem):
             if not startingGameState.hasFood(*corner):
                 print('Warning: no food in corner ' + str(corner))
         self._expanded = 0
+def cornersHeuristic(state: Any, problem: CornersProblem):
+    corners = problem.corners # These are the corner coordinates
+    walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     def getStartState(self):
         visited = tuple(self.startingPosition == corner for corner in self.corners)
         return (self.startingPosition, visited)
+    position, visited = state
+    unvisited = [corners[i] for i in range(len(corners)) if not visited[i]]
 
     def isGoalState(self, state: Any):
         position, visited = state
         return all(visited)
+    if not unvisited:
+        return 0
 
     def getSuccessors(self, state: Any):
         successors = []
         position, visited = state
         x, y = position
+    import itertools
+    min_dist = float('inf')
+    for perm in itertools.permutations(unvisited):
+        dist = util.manhattanDistance(position, perm[0])
+        for i in range(len(perm) - 1):
+            dist += util.manhattanDistance(perm[i], perm[i+1])
+        if dist < min_dist:
+            min_dist = dist
 
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             dx, dy = Actions.directionToVector(action)
@@ -213,8 +255,13 @@ class CornersProblem(search.SearchProblem):
 
         self._expanded += 1
         return successors
+    return min_dist
 ```
 
 ### 5.4 Verification & Empirical Results
 - **`tinyCorners` (`fn=bfs,prob=CornersProblem`)**: Path Cost = **28**, Nodes Expanded = **252**
 - **`mediumCorners` (`fn=bfs,prob=CornersProblem`)**: Path Cost = **106**, Nodes Expanded = **1,966**
+### 6.3 Verification Results
+- **Command**: `python pacman.py -l mediumCorners -p AStarCornersAgent -z 0.5`
+- **Solution Path Cost**: **106** (Optimal)
+- **Search Nodes Expanded**: **741** (Top performance tier < 800 nodes)
