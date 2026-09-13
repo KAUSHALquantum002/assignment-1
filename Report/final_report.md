@@ -21,7 +21,7 @@ This report presents the implementation, empirical results, and critical analysi
 - **A* Search (Q4)**: Implemented A* Search using $f(n) = g(n) + h(n)$, demonstrating superior node reduction over UCS/BFS on `bigMaze` and `openMaze`.
 - **Corners Problem Formulation (Q5)**: Designed a compact abstract state representation `((x, y), (c0_visited, c1_visited, c2_visited, c3_visited))` for visiting all 4 maze corners.
 - **Corners Problem Heuristic (Q6)**: Formulated an admissible permutation-based minimum Manhattan path heuristic, achieving **741** expanded nodes on `mediumCorners` (placing in the top performance tier $< 800$ nodes).
-- **Food Search Heuristic (Q7)**: Formulated an admissible and consistent cached maximum maze-distance heuristic for eating all food dots, achieving **4,137** expanded nodes in **0.3 seconds** on `trickySearch` (qualifying for **+5 Extra Credit** $< 7,000$ nodes).
+- **Food Search Heuristic (Q7)**: Formulated an admissible and consistent cached maximum maze-distance heuristic for eating all food dots, achieving **4,137** expanded nodes in **0.3 seconds** on `trickySearch`.
 
 ---
 
