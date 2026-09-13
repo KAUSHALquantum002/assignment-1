@@ -83,11 +83,24 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
 ```
 
 #### 3.1.2 Empirical Statistics & Execution Table
-| Layout | Command Executed | Solution Path Cost | Nodes Expanded | Time (s) | Game Score | Result |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| `tinyMaze` | `python pacman.py -l tinyMaze -p SearchAgent` | 10 | 15 | 0.0s | 500.0 | Win |
-| `mediumMaze` | `python pacman.py -l mediumMaze -p SearchAgent` | 130 | 146 | 0.0s | 380.0 | Win |
-| `bigMaze` | `python pacman.py -l bigMaze -z .5 -p SearchAgent` | 210 | 390 | 0.0s | 300.0 | Win |
+
+**Commands Executed:**
+```bash
+# tinyMaze
+python pacman.py -l tinyMaze -p SearchAgent
+
+# mediumMaze
+python pacman.py -l mediumMaze -p SearchAgent
+
+# bigMaze
+python pacman.py -l bigMaze -z .5 -p SearchAgent
+```
+
+| Layout | Solution Path Cost | Nodes Expanded | Time (s) | Game Score | Result |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| `tinyMaze` | 10 | 15 | 0.0s | 500.0 | Win |
+| `mediumMaze` | 130 | 146 | 0.0s | 380.0 | Win |
+| `bigMaze` | 210 | 390 | 0.0s | 300.0 | Win |
 
 #### 3.1.3 Observations & Conceptual Answers
 1. **Exploration Order**: DFS pops states from the LIFO stack in reverse order of pushing. For successor order `[North, South, East, West]`, `West` is popped and explored first.
@@ -123,11 +136,24 @@ def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
 ```
 
 #### 3.2.2 Empirical Statistics & Execution Table
-| Layout / Problem | Command Executed | Solution Path Cost | Nodes Expanded | Time (s) | Game Score | Result |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| `mediumMaze` | `python pacman.py -l mediumMaze -p SearchAgent -a fn=bfs` | **68** | 269 | 0.0s | 442.0 | Win (Optimal) |
-| `bigMaze` | `python pacman.py -l bigMaze -p SearchAgent -a fn=bfs -z .5` | **210** | 620 | 0.0s | 300.0 | Win (Optimal) |
-| `eightpuzzle.py` | `python eightpuzzle.py` | **1** | N/A | 0.0s | N/A | Win (Optimal) |
+
+**Commands Executed:**
+```bash
+# mediumMaze
+python pacman.py -l mediumMaze -p SearchAgent -a fn=bfs
+
+# bigMaze
+python pacman.py -l bigMaze -p SearchAgent -a fn=bfs -z .5
+
+# eightpuzzle.py
+python eightpuzzle.py
+```
+
+| Layout / Problem | Solution Path Cost | Nodes Expanded | Time (s) | Game Score | Result |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| `mediumMaze` | **68** | 269 | 0.0s | 442.0 | Win (Optimal) |
+| `bigMaze` | **210** | 620 | 0.0s | 300.0 | Win (Optimal) |
+| `eightpuzzle.py` | **1** | N/A | 0.0s | N/A | Win (Optimal) |
 
 #### 3.2.3 Observations & Conceptual Answers
 1. **Optimality Proof**: In unweighted graphs (all step costs $c=1$), path cost equals path depth. Because BFS expands nodes level-by-level, the first goal state dequeued is guaranteed to have the minimum possible path cost (**68** on `mediumMaze` vs **130** for DFS).
@@ -162,11 +188,24 @@ def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
 ```
 
 #### 3.3.2 Empirical Statistics & Execution Table
-| Layout | Agent / Cost Function | Command Executed | Solution Path Cost | Nodes Expanded | Time (s) | Game Score | Result |
-| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| `mediumMaze` | `SearchAgent` (Uniform) | `python pacman.py -l mediumMaze -p SearchAgent -a fn=ucs` | **68** | 269 | 0.0s | 442.0 | Win |
-| `mediumDottedMaze` | `StayEastSearchAgent` ($0.5^x$) | `python pacman.py -l mediumDottedMaze -p StayEastSearchAgent` | **1** | 186 | 0.0s | 646.0 | Win |
-| `mediumScaryMaze` | `StayWestSearchAgent` ($2^x$) | `python pacman.py -l mediumScaryMaze -p StayWestSearchAgent` | **68,719,479,864** | 108 | 0.0s | 418.0 | Win |
+
+**Commands Executed:**
+```bash
+# mediumMaze (SearchAgent - Uniform)
+python pacman.py -l mediumMaze -p SearchAgent -a fn=ucs
+
+# mediumDottedMaze (StayEastSearchAgent - 0.5^x)
+python pacman.py -l mediumDottedMaze -p StayEastSearchAgent
+
+# mediumScaryMaze (StayWestSearchAgent - 2^x)
+python pacman.py -l mediumScaryMaze -p StayWestSearchAgent
+```
+
+| Layout | Agent / Cost Function | Solution Path Cost | Nodes Expanded | Time (s) | Game Score | Result |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| `mediumMaze` | `SearchAgent` (Uniform) | **68** | 269 | 0.0s | 442.0 | Win |
+| `mediumDottedMaze` | `StayEastSearchAgent` ($0.5^x$) | **1** | 186 | 0.0s | 646.0 | Win |
+| `mediumScaryMaze` | `StayWestSearchAgent` ($2^x$) | **68,719,479,864** | 108 | 0.0s | 418.0 | Win |
 
 #### 3.3.3 Mathematical Analysis of Cost Difference
 - **`SearchAgent` (`mediumMaze`)**: Uniform step cost $\text{cost}(x, y) = 1$. Total cost = $68 \times 1 = \mathbf{68}$.
@@ -204,13 +243,32 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directi
 ```
 
 #### 3.4.2 Empirical Statistics & Execution Table
-| Layout | Search Strategy / Heuristic | Command Executed | Solution Path Cost | Nodes Expanded | Time (s) | Game Score | Result |
-| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| `bigMaze` | A* (`manhattanHeuristic`) | `python pacman.py -l bigMaze -z .5 -p SearchAgent -a fn=astar,heuristic=manhattanHeuristic` | **210** | **549** | 0.0s | 300.0 | Win (549 vs 620 UCS) |
-| `openMaze` | DFS | `python pacman.py -l openMaze -p SearchAgent -a fn=dfs` | 298 | 576 | 0.0s | 212.0 | Win (Sub-optimal) |
-| `openMaze` | BFS | `python pacman.py -l openMaze -p SearchAgent -a fn=bfs` | **54** | 682 | 0.0s | 456.0 | Win (Concentric) |
-| `openMaze` | UCS | `python pacman.py -l openMaze -p SearchAgent -a fn=ucs` | **54** | 682 | 0.0s | 456.0 | Win (Concentric) |
-| `openMaze` | A* (`manhattanHeuristic`) | `python pacman.py -l openMaze -p SearchAgent -a fn=astar,heuristic=manhattanHeuristic` | **54** | **535** | 0.0s | 456.0 | Win (Directional) |
+
+**Commands Executed:**
+```bash
+# bigMaze - A* (manhattanHeuristic)
+python pacman.py -l bigMaze -z .5 -p SearchAgent -a fn=astar,heuristic=manhattanHeuristic
+
+# openMaze - DFS
+python pacman.py -l openMaze -p SearchAgent -a fn=dfs
+
+# openMaze - BFS
+python pacman.py -l openMaze -p SearchAgent -a fn=bfs
+
+# openMaze - UCS
+python pacman.py -l openMaze -p SearchAgent -a fn=ucs
+
+# openMaze - A* (manhattanHeuristic)
+python pacman.py -l openMaze -p SearchAgent -a fn=astar,heuristic=manhattanHeuristic
+```
+
+| Layout | Search Strategy / Heuristic | Solution Path Cost | Nodes Expanded | Time (s) | Game Score | Result |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| `bigMaze` | A* (`manhattanHeuristic`) | **210** | **549** | 0.0s | 300.0 | Win (549 vs 620 UCS) |
+| `openMaze` | DFS | 298 | 576 | 0.0s | 212.0 | Win (Sub-optimal) |
+| `openMaze` | BFS | **54** | 682 | 0.0s | 456.0 | Win (Concentric) |
+| `openMaze` | UCS | **54** | 682 | 0.0s | 456.0 | Win (Concentric) |
+| `openMaze` | A* (`manhattanHeuristic`) | **54** | **535** | 0.0s | 456.0 | Win (Directional) |
 
 #### 3.4.3 Search Strategy Comparison on `openMaze`
 - **DFS**: Wanders through open space, returning a highly sub-optimal path of cost **298**.
@@ -263,10 +321,20 @@ class CornersProblem(search.SearchProblem):
 ```
 
 #### 3.5.2 Empirical Statistics & Execution Table
-| Layout | Problem | Command Executed | Solution Path Cost | Nodes Expanded | Time (s) | Game Score | Result |
-| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| `tinyCorners` | `CornersProblem` | `python pacman.py -l tinyCorners -p SearchAgent -a fn=bfs,prob=CornersProblem` | **28** | 252 | 0.0s | 512.0 | Win (~28 steps) |
-| `mediumCorners` | `CornersProblem` | `python pacman.py -l mediumCorners -p SearchAgent -a fn=bfs,prob=CornersProblem` | **106** | 1,966 | 0.0s | 434.0 | Win (< 2,000 nodes) |
+
+**Commands Executed:**
+```bash
+# tinyCorners
+python pacman.py -l tinyCorners -p SearchAgent -a fn=bfs,prob=CornersProblem
+
+# mediumCorners
+python pacman.py -l mediumCorners -p SearchAgent -a fn=bfs,prob=CornersProblem
+```
+
+| Layout | Problem | Solution Path Cost | Nodes Expanded | Time (s) | Game Score | Result |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| `tinyCorners` | `CornersProblem` | **28** | 252 | 0.0s | 512.0 | Win (~28 steps) |
+| `mediumCorners` | `CornersProblem` | **106** | 1,966 | 0.0s | 434.0 | Win (< 2,000 nodes) |
 
 ---
 
@@ -297,9 +365,16 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
 ```
 
 #### 3.6.2 Empirical Statistics & Execution Table
-| Layout | Agent / Heuristic | Command Executed | Solution Path Cost | Nodes Expanded | Time (s) | Game Score | Rubric Status |
-| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| `mediumCorners` | `AStarCornersAgent` (`cornersHeuristic`) | `python pacman.py -l mediumCorners -p AStarCornersAgent -z 0.5` | **106** | **741** | 0.0s | 434.0 | **Top Tier (< 800 nodes)** |
+
+**Commands Executed:**
+```bash
+# mediumCorners
+python pacman.py -l mediumCorners -p AStarCornersAgent -z 0.5
+```
+
+| Layout | Agent / Heuristic | Solution Path Cost | Nodes Expanded | Time (s) | Game Score | Rubric Status |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| `mediumCorners` | `AStarCornersAgent` (`cornersHeuristic`) | **106** | **741** | 0.0s | 434.0 | **Top Tier (< 800 nodes)** |
 
 ---
 
@@ -332,10 +407,20 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
 ```
 
 #### 3.7.2 Empirical Statistics & Execution Table
-| Layout | Agent / Heuristic | Command Executed | Solution Path Cost | Nodes Expanded | Time (s) | Game Score | Rubric Status |
-| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| `testSearch` | `AStarFoodSearchAgent` (`foodHeuristic`) | `python pacman.py -l testSearch -p AStarFoodSearchAgent` | **7** | 10 | 0.0s | 513.0 | Optimal (7 steps) |
-| `trickySearch` | `AStarFoodSearchAgent` (`foodHeuristic`) | `python pacman.py -l trickySearch -p AStarFoodSearchAgent` | **60** | **4,137** | 0.3s | 570.0 | **+5 Extra Credit (< 7,000 nodes)** |
+
+**Commands Executed:**
+```bash
+# testSearch
+python pacman.py -l testSearch -p AStarFoodSearchAgent
+
+# trickySearch
+python pacman.py -l trickySearch -p AStarFoodSearchAgent
+```
+
+| Layout | Agent / Heuristic | Solution Path Cost | Nodes Expanded | Time (s) | Game Score | Rubric Status |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| `testSearch` | `AStarFoodSearchAgent` (`foodHeuristic`) | **7** | 10 | 0.0s | 513.0 | Optimal (7 steps) |
+| `trickySearch` | `AStarFoodSearchAgent` (`foodHeuristic`) | **60** | **4,137** | 0.3s | 570.0 | **+5 Extra Credit (< 7,000 nodes)** |
 
 #### 3.7.3 Proof of Admissibility and Consistency
 - **Admissibility**: Pac-Man must visit all remaining food dots, including the farthest dot in maze distance. Therefore, $h(s) = \max_{f \in \text{food}} \text{mazeDistance}(pos, f) \le h^*(s)$ is a strict lower bound.
