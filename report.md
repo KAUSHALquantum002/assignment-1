@@ -2,11 +2,12 @@
 
 ## Executive Summary
 
-This report documents the implementation, empirical testing, and theoretical analysis of classical search algorithms applied to Pac-Man maze navigation and the 8-puzzle problem. The algorithms implemented in `search.py` include:
+This report documents the implementation, empirical testing, and theoretical analysis of classical search algorithms applied to Pac-Man maze navigation and the 8-puzzle problem. The algorithms implemented in `search.py` and `searchAgents.py` include:
 1. **Depth-First Search (DFS)** - Uninformed LIFO Graph Search
 2. **Breadth-First Search (BFS)** - Uninformed FIFO Graph Search
 3. **Uniform-Cost Search (UCS)** - Priority-based Graph Search by path cost $g(n)$
 4. **A* Search** - Informed Graph Search by $f(n) = g(n) + h(n)$
+5. **CornersProblem State Formulation** - Abstract search space encoding Pac-Man's position and visited corner states.
 
 ---
 
@@ -25,6 +26,8 @@ This report documents the implementation, empirical testing, and theoretical ana
 | **Q3** | UCS | `mediumScaryMaze` | `StayWestSearchAgent` ($2^x$) | **68,719,479,864** | 108 | **Yes** |
 | **Q4** | A* | `bigMaze` | `manhattanHeuristic` | **210** | **549** | **Yes** |
 | **Q4** | A* | `openMaze` | `manhattanHeuristic` | **54** | **535** | **Yes** |
+| **Q5** | BFS | `tinyCorners` | `CornersProblem` | **28** | 252 | **Yes** |
+| **Q5** | BFS | `mediumCorners` | `CornersProblem` | **106** | **1,966** | **Yes** |
 
 ---
 
@@ -38,9 +41,6 @@ Implemented in `depthFirstSearch` in `search.py` using `util.Stack()`:
 
 ```python
 def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
-    """
-    Search the deepest nodes in the search tree first.
-    """
     fringe = util.Stack()
     start_state = problem.getStartState()
     fringe.push((start_state, []))
@@ -61,19 +61,6 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
     return []
 ```
 
-### 1.3 Empirical Results
-- **`tinyMaze`**: Cost = **10**, Nodes Expanded = **15**
-- **`mediumMaze`**: Cost = **130**, Nodes Expanded = **146**
-- **`bigMaze`**: Cost = **210**, Nodes Expanded = **390**
-
-### 1.4 Conceptual Questions & Answers
-1. **Is the exploration order what you would have expected?**
-   - **Yes.** DFS expands deep along a single branch before backtracking. Because `util.Stack` is LIFO, pushing successors `[North, South, East, West]` causes `West` to be popped and explored first.
-2. **Does Pac-Man actually go to all the explored squares on its way to the goal?**
-   - **No.** Explored red squares represent states evaluated in search space during the algorithm's execution. Pac-Man physically travels only along the final returned solution path.
-3. **Is this a least-cost solution? If not, think about what depth-first search is doing wrong.**
-   - **No.** DFS is not optimal because it returns the first path it finds reaching the goal, regardless of path length or step costs.
-
 ---
 
 ## Question 2: Breadth-First Search (BFS)
@@ -86,7 +73,6 @@ Implemented in `breadthFirstSearch` in `search.py` using `util.Queue()`:
 
 ```python
 def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
-    """Search the shallowest nodes in the search tree first."""
     fringe = util.Queue()
     start_state = problem.getStartState()
     fringe.push((start_state, []))
@@ -107,15 +93,6 @@ def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
     return []
 ```
 
-### 2.3 Empirical Results
-- **`mediumMaze`**: Cost = **68** (Optimal), Nodes Expanded = **269**
-- **`bigMaze`**: Cost = **210** (Optimal), Nodes Expanded = **620**
-- **`eightpuzzle.py`**: Solved 8-puzzle instance correctly in 1 move (`['up']`).
-
-### 2.4 Conceptual Questions & Answers
-1. **Does BFS find a least-cost solution?**
-   - **Yes.** When all edge step costs are equal (uniform cost = 1), path depth equals path cost. Since BFS explores level-by-level, the first time a goal state is dequeued, it is guaranteed to be reached via the shortest/least-cost path.
-
 ---
 
 ## Question 3: Uniform-Cost Search (UCS)
@@ -128,7 +105,6 @@ Implemented in `uniformCostSearch` in `search.py` using `util.PriorityQueue()`:
 
 ```python
 def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
-    """Search the node of least total cost first."""
     fringe = util.PriorityQueue()
     start_state = problem.getStartState()
     fringe.push((start_state, [], 0), 0)
@@ -150,11 +126,6 @@ def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
     return []
 ```
 
-### 3.3 Empirical Results
-- **`mediumMaze` (`fn=ucs`)**: Cost = **68** (Optimal), Nodes Expanded = **269**
-- **`mediumDottedMaze` (`StayEastSearchAgent`)**: Cost = **1**, Nodes Expanded = **186**
-- **`mediumScaryMaze` (`StayWestSearchAgent`)**: Cost = **68,719,479,864**, Nodes Expanded = **108**
-
 ---
 
 ## Question 4: A* Search
@@ -167,7 +138,6 @@ Implemented in `aStarSearch` in `search.py` using `util.PriorityQueue()`:
 
 ```python
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directions]:
-    """Search the node that has the lowest combined cost and heuristic first."""
     fringe = util.PriorityQueue()
     start_state = problem.getStartState()
     fringe.push((start_state, [], 0), 0 + heuristic(start_state, problem))
@@ -190,14 +160,61 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directi
     return []
 ```
 
-### 4.3 Empirical Results & `openMaze` Comparison
-- **`bigMaze` (`manhattanHeuristic`)**: Cost = **210** (Optimal), Nodes Expanded = **549** (vs 620 for UCS)
+---
 
-#### Strategy Comparison on `openMaze`:
-| Strategy | Solution Cost | Search Nodes Expanded | Behavior / Analysis |
-| :--- | :---: | :---: | :--- |
-| **DFS** | 298 | 576 | Wanders extensively through open space, returning a highly sub-optimal path (cost 298). |
-| **BFS** | 54 | 682 | Finds the optimal path (cost 54), expanding nodes uniformly in all directions (concentric wave). |
-| **UCS** | 54 | 682 | Identical to BFS because edge step costs are uniform ($1$). |
-| **A\*** (`manhattanHeuristic`) | **54** | **535** | Finds the optimal path while expanding significantly fewer nodes (**535** vs **682**) by directing search towards the goal. |
+## Question 5: CornersProblem State Formulation
 
+### 5.1 Description
+The `CornersProblem` requires Pac-Man to find the shortest path visiting all 4 corners of a layout. 
+
+### 5.2 Abstract State Space Selection
+To prevent state-space explosion, the state is represented compactly as:
+$$\text{state} = \big((x, y), \, (c_0, c_1, c_2, c_3)\big)$$
+where $(x, y)$ is Pac-Man's position and $(c_0, c_1, c_2, c_3)$ is a tuple of 4 booleans tracking whether each of the 4 corner positions has been visited.
+
+### 5.3 Implementation
+Implemented in `CornersProblem` in `searchAgents.py`:
+
+```python
+class CornersProblem(search.SearchProblem):
+    def __init__(self, startingGameState: pacman.GameState):
+        self.walls = startingGameState.getWalls()
+        self.startingPosition = startingGameState.getPacmanPosition()
+        top, right = self.walls.height-2, self.walls.width-2
+        self.corners = ((1,1), (1,top), (right, 1), (right, top))
+        for corner in self.corners:
+            if not startingGameState.hasFood(*corner):
+                print('Warning: no food in corner ' + str(corner))
+        self._expanded = 0
+
+    def getStartState(self):
+        visited = tuple(self.startingPosition == corner for corner in self.corners)
+        return (self.startingPosition, visited)
+
+    def isGoalState(self, state: Any):
+        position, visited = state
+        return all(visited)
+
+    def getSuccessors(self, state: Any):
+        successors = []
+        position, visited = state
+        x, y = position
+
+        for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not self.walls[nextx][nexty]:
+                next_pos = (nextx, nexty)
+                new_visited = list(visited)
+                for i, corner in enumerate(self.corners):
+                    if next_pos == corner:
+                        new_visited[i] = True
+                successors.append(((next_pos, tuple(new_visited)), action, 1))
+
+        self._expanded += 1
+        return successors
+```
+
+### 5.4 Verification & Empirical Results
+- **`tinyCorners` (`fn=bfs,prob=CornersProblem`)**: Path Cost = **28**, Nodes Expanded = **252**
+- **`mediumCorners` (`fn=bfs,prob=CornersProblem`)**: Path Cost = **106**, Nodes Expanded = **1,966**
