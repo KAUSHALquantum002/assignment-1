@@ -463,8 +463,26 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    food_list = foodGrid.asList()
+
+    if not food_list:
+        return 0
+
+    if 'distances' not in problem.heuristicInfo:
+        problem.heuristicInfo['distances'] = {}
+
+    distances = problem.heuristicInfo['distances']
+
+    max_dist = 0
+    for food in food_list:
+        key = (position, food)
+        if key not in distances:
+            distances[key] = mazeDistance(position, food, problem.startingGameState)
+        dist = distances[key]
+        if dist > max_dist:
+            max_dist = dist
+
+    return max_dist
 
 
 def mazeDistance(point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState) -> int:
