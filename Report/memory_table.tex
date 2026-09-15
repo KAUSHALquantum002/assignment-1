@@ -1,0 +1,41 @@
+% environment
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{table}[htbp]
+\centering
+\caption{Peak traced Python memory during search}
+\label{tab:search-memory}
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{lllr}
+\hline
+\textbf{Search} & \textbf{Layout / Input} & \textbf{Problem} & \textbf{Peak memory (MiB)} \\
+\hline
+DFS & \texttt{tinyMaze}         & Position & 0.003830 \\
+DFS & \texttt{mediumMaze}       & Position & 0.030151 \\
+DFS & \texttt{bigMaze}          & Position & 0.114052 \\
+BFS & \texttt{mediumMaze}       & Position & 0.038132 \\
+BFS & \texttt{bigMaze}          & Position & 0.100830 \\
+BFS & Fixed 8-puzzle            & Puzzle   & 0.006637 \\
+UCS & \texttt{mediumMaze}       & Position & 0.039192 \\
+UCS & \texttt{mediumDottedMaze} & StayEast & 0.035271 \\
+UCS & \texttt{mediumScaryMaze}  & StayWest & 0.031200 \\
+A*  & \texttt{bigMaze}          & Position & 0.100372 \\
+DFS & \texttt{openMaze}         & Position & 0.549309 \\
+BFS & \texttt{openMaze}         & Position & 0.104294 \\
+UCS & \texttt{openMaze}         & Position & 0.109413 \\
+A*  & \texttt{openMaze}         & Position & 0.101685 \\
+BFS & \texttt{tinyCorners}      & Corners  & 0.063950 \\
+BFS & \texttt{mediumCorners}    & Corners  & 0.534843 \\
+A*  & \texttt{mediumCorners}    & Corners  & 0.194038 \\
+A*  & \texttt{testSearch}       & Food     & 0.014252 \\
+A*  & \texttt{trickySearch}     & Food     & 12.379196 \\
+\hline
+\end{tabular}
+\end{table}
+
+\end{document}
